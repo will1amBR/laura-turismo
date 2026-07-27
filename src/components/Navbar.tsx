@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Plane, Menu, User, LogOut, ShieldCheck, Compass } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
+import { useScrollPosition } from '@/hooks/use-scroll-position'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import {
@@ -16,6 +18,7 @@ export function Navbar() {
   const { user, isAuthenticated, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const scrolled = useScrollPosition(100)
 
   const handleLogout = () => {
     signOut()
@@ -23,35 +26,49 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur support-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full transition-all duration-300',
+        scrolled ? 'bg-white shadow-md text-stone-900' : 'bg-transparent text-white',
+      )}
+    >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link
           to="/"
-          className="flex items-center gap-2 text-xl font-bold tracking-tight text-teal-800"
+          className={cn(
+            'flex items-center gap-2 text-xl font-bold tracking-tight transition-colors',
+            scrolled ? 'text-stone-900' : 'text-white',
+          )}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-white shadow">
+          <div
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-lg shadow transition-colors',
+              scrolled
+                ? 'bg-gradient-to-br from-amber-500 to-sky-600 text-white'
+                : 'bg-white/20 backdrop-blur text-white border border-white/30',
+            )}
+          >
             <Plane className="h-5 w-5" />
           </div>
           <span>Laura Turismo</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link
-            to="/"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-teal-700"
-          >
-            Início
-          </Link>
           <a
             href="/#pacotes"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-teal-700"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              scrolled ? 'text-stone-600 hover:text-amber-600' : 'text-white/90 hover:text-white',
+            )}
           >
             Pacotes
           </a>
           <a
             href="/#como-funciona"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-teal-700"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              scrolled ? 'text-stone-600 hover:text-amber-600' : 'text-white/90 hover:text-white',
+            )}
           >
             Como Funciona
           </a>
@@ -59,7 +76,10 @@ export function Navbar() {
           {isAuthenticated && (
             <Link
               to="/meus-grupos"
-              className="text-sm font-medium text-teal-700 hover:underline flex items-center gap-1"
+              className={cn(
+                'text-sm font-medium hover:underline flex items-center gap-1',
+                scrolled ? 'text-amber-600' : 'text-white',
+              )}
             >
               <Compass className="h-4 w-4" /> Meus Grupos
             </Link>
@@ -75,13 +95,20 @@ export function Navbar() {
           )}
         </nav>
 
-        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 border-teal-200 hover:bg-teal-50">
-                  <User className="h-4 w-4 text-teal-700" />
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'gap-2 transition-colors',
+                    scrolled
+                      ? 'border-stone-300 hover:bg-stone-50'
+                      : 'border-white/40 text-white hover:bg-white/10 bg-transparent',
+                  )}
+                >
+                  <User className="h-4 w-4" />
                   <span className="max-w-[120px] truncate">{user?.name || user?.email}</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -102,41 +129,47 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => navigate('/entrar')}>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/entrar')}
+                className={cn(
+                  'transition-colors',
+                  scrolled ? 'text-stone-700 hover:text-stone-900' : 'text-white hover:bg-white/10',
+                )}
+              >
                 Entrar
               </Button>
               <Button
-                className="bg-teal-700 hover:bg-teal-800"
+                className="bg-gradient-to-r from-amber-500 to-sky-600 hover:from-amber-600 hover:to-sky-700 text-white font-semibold shadow-lg transition-all duration-300"
                 onClick={() => navigate('/cadastrar')}
               >
-                Cadastrar
+                Cadastre-se
               </Button>
             </>
           )}
         </div>
 
-        {/* Mobile Hamburger */}
         <div className="flex md:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button
+                variant="outline"
+                size="icon"
+                className={cn(
+                  'transition-colors',
+                  scrolled ? 'border-stone-300' : 'border-white/40 text-white bg-white/10',
+                )}
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
               <SheetHeader>
-                <SheetTitle className="flex items-center gap-2 text-teal-800">
-                  <Plane className="h-5 w-5" /> Laura Turismo
+                <SheetTitle className="flex items-center gap-2 text-stone-900">
+                  <Plane className="h-5 w-5 text-amber-500" /> Laura Turismo
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-6">
-                <Link
-                  to="/"
-                  onClick={() => setOpen(false)}
-                  className="text-base font-medium py-2 border-b"
-                >
-                  Início
-                </Link>
                 <a
                   href="/#pacotes"
                   onClick={() => setOpen(false)}
@@ -156,7 +189,7 @@ export function Navbar() {
                   <Link
                     to="/meus-grupos"
                     onClick={() => setOpen(false)}
-                    className="text-base font-medium py-2 border-b text-teal-700"
+                    className="text-base font-medium py-2 border-b text-amber-600"
                   >
                     Meus Grupos
                   </Link>
@@ -195,13 +228,13 @@ export function Navbar() {
                         Entrar
                       </Button>
                       <Button
-                        className="bg-teal-700 hover:bg-teal-800"
+                        className="bg-gradient-to-r from-amber-500 to-sky-600 hover:from-amber-600 hover:to-sky-700 text-white font-semibold"
                         onClick={() => {
                           navigate('/cadastrar')
                           setOpen(false)
                         }}
                       >
-                        Cadastrar
+                        Cadastre-se
                       </Button>
                     </>
                   )}
