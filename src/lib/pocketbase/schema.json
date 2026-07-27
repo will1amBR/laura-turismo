@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T19:26:34.832Z",
+  "generatedAt": "2026-07-27T19:53:42.172Z",
   "collections": [
     {
       "name": "users",
@@ -183,6 +183,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "departure_airport",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "arrival_airport",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE INDEX idx_groups_status ON groups (status)"]
@@ -444,6 +456,86 @@
         }
       ],
       "indexes": ["CREATE INDEX idx_checklist_group ON trip_checklist_items (`group`)"]
+    },
+    {
+      "name": "airline_quotes",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "group",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "groups"
+        },
+        {
+          "name": "airline_name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "departure_airport",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "arrival_airport",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "departure_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "return_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "price_cents",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_airline_quotes_group ON airline_quotes (`group`)",
+        "CREATE INDEX idx_airline_quotes_departure_date ON airline_quotes (departure_date)"
+      ]
     }
   ]
 }

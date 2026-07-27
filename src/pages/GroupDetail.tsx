@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft } from 'lucide-react'
+import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft, Plane } from 'lucide-react'
 import { getGroup, GroupRecord } from '@/services/groups'
 import { getGroupMembers, updateMemberStatus, GroupMemberRecord } from '@/services/members'
+import { getGroupQuotes, AirlineQuoteRecord } from '@/services/airline-quotes'
+import { formatCurrency } from '@/lib/utils'
 import {
   getGroupSchedules,
   createScheduleWithPhoto,
@@ -37,6 +39,7 @@ export default function GroupDetail() {
   const [group, setGroup] = useState<GroupRecord | null>(null)
   const [members, setMembers] = useState<GroupMemberRecord[]>([])
   const [schedules, setSchedules] = useState<DailyScheduleRecord[]>([])
+  const [quotes, setQuotes] = useState<AirlineQuoteRecord[]>([])
   const [loading, setLoading] = useState(true)
 
   const [addDayOpen, setAddDayOpen] = useState(false)
@@ -52,14 +55,16 @@ export default function GroupDetail() {
   const loadData = async () => {
     if (!id) return
     try {
-      const [g, m, s] = await Promise.all([
+      const [g, m, s, q] = await Promise.all([
         getGroup(id),
         getGroupMembers(id),
         getGroupSchedules(id),
+        getGroupQuotes(id),
       ])
       setGroup(g)
       setMembers(m)
       setSchedules(s)
+      setQuotes(q)
     } catch {
       toast({ title: 'Erro ao carregar dados do grupo', variant: 'destructive' })
     } finally {
@@ -75,6 +80,9 @@ export default function GroupDetail() {
     loadData()
   })
   useRealtime('daily_schedules', () => {
+    loadData()
+  })
+  useRealtime('airline_quotes', () => {
     loadData()
   })
 
@@ -310,6 +318,42 @@ export default function GroupDetail() {
               )}
             </div>
           </div>
+
+          {quotes.length > 0 && (
+            <Card className="border-teal-200 bg-teal-50/30">
+              <CardHeader className="pb-3 border-b border-teal-100">
+                <CardTitle className="text-lg text-slate-900 flex items-center gap-2">
+                  <Plane className="w-5 h-5 text-teal-700" /> Cotações Aéreas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  {quotes.map((q) => (
+                    <div
+                      key={q.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-white rounded-lg border border-slate-100"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Badge className="bg-teal-700 text-white">{q.airline_name}</Badge>
+                        <span className="text-xs text-slate-600">
+                          {q.departure_airport || '—'} → {q.arrival_airport || '—'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-slate-500">
+                          {q.departure_date ? formatDate(q.departure_date) : ''} —{' '}
+                          {q.return_date ? formatDate(q.return_date) : ''}
+                        </span>
+                        <span className="font-bold text-teal-800">
+                          {formatCurrency(q.price_cents)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {schedules.length === 0 ? (
             <Card className="p-8 text-center text-slate-500 border-dashed">

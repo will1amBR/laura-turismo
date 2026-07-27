@@ -11,6 +11,8 @@ export interface GroupRecord {
   current_members: number
   status: 'em_formacao' | 'confirmado' | 'em_andamento' | 'finalizado'
   admin: string
+  departure_airport: string
+  arrival_airport: string
   expand?: {
     package?: PackageRecord
     admin?: { id: string; name: string; email: string }
@@ -26,6 +28,12 @@ export const getGroup = (id: string) =>
 export const getPackageGroups = (packageId: string) =>
   pb.collection('groups').getFullList<GroupRecord>({
     filter: `package = "${packageId}"`,
+    expand: 'package',
+    sort: 'start_date',
+  })
+export const getUpcomingGroups = () =>
+  pb.collection('groups').getFullList<GroupRecord>({
+    filter: 'status = "em_formacao"',
     expand: 'package',
     sort: 'start_date',
   })

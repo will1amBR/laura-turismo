@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 import { Plus, Trash2, Settings } from 'lucide-react'
+import { DEPARTURE_AIRPORTS } from '@/components/FlightSearchFilter'
 
 export function ManageGroups() {
   const { user } = useAuth()
@@ -37,6 +38,8 @@ export function ManageGroups() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [capacity, setCapacity] = useState(12)
+  const [departureAirport, setDepartureAirport] = useState('')
+  const [arrivalAirport, setArrivalAirport] = useState('')
 
   const loadData = () => {
     getGroups()
@@ -50,6 +53,16 @@ export function ManageGroups() {
   useEffect(() => {
     loadData()
   }, [])
+
+  const resetForm = () => {
+    setName('')
+    setPackageId('')
+    setStartDate('')
+    setEndDate('')
+    setCapacity(12)
+    setDepartureAirport('')
+    setArrivalAirport('')
+  }
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,10 +78,12 @@ export function ManageGroups() {
         current_members: 0,
         status: 'em_formacao',
         admin: user.id,
+        departure_airport: departureAirport,
+        arrival_airport: arrivalAirport,
       })
       toast({ title: 'Grupo criado com sucesso!' })
       setOpenModal(false)
-      setName('')
+      resetForm()
       loadData()
     } catch {
       toast({ title: 'Erro ao criar grupo', variant: 'destructive' })
@@ -96,7 +111,7 @@ export function ManageGroups() {
               <Plus className="w-4 h-4" /> Criar Grupo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Criar Novo Grupo</DialogTitle>
             </DialogHeader>
@@ -148,6 +163,29 @@ export function ManageGroups() {
                   onChange={(e) => setCapacity(Number(e.target.value))}
                 />
               </div>
+              <div>
+                <Label>Aeroporto de Saída</Label>
+                <Select value={departureAirport} onValueChange={setDepartureAirport}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o aeroporto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTURE_AIRPORTS.map((airport) => (
+                      <SelectItem key={airport} value={airport}>
+                        {airport}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Aeroporto de Chegada</Label>
+                <Input
+                  value={arrivalAirport}
+                  onChange={(e) => setArrivalAirport(e.target.value)}
+                  placeholder="Ex: Santiago (SCL)"
+                />
+              </div>
               <Button type="submit" className="w-full bg-teal-700 text-white">
                 Salvar Grupo
               </Button>
@@ -184,6 +222,12 @@ export function ManageGroups() {
               <p>
                 Período: {formatDate(group.start_date)} até {formatDate(group.end_date)}
               </p>
+              {(group.departure_airport || group.arrival_airport) && (
+                <p className="text-xs">
+                  <span className="font-semibold">Rota:</span> {group.departure_airport || '—'} →{' '}
+                  {group.arrival_airport || '—'}
+                </p>
+              )}
               <div className="flex justify-between items-center pt-2">
                 <Badge variant="outline">
                   {group.current_members} / {group.capacity} membros

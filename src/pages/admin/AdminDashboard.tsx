@@ -4,8 +4,9 @@ import { useAuth } from '@/hooks/use-auth'
 import { LeadsKanban } from './LeadsKanban'
 import { ManagePackages } from './ManagePackages'
 import { ManageGroups } from './ManageGroups'
+import { ManageAirlineQuotes } from './ManageAirlineQuotes'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ShieldCheck, Users, Package, Compass } from 'lucide-react'
+import { ShieldCheck, Users, Package, Compass, Plane } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { isAuthenticated, isAdmin, loading } = useAuth()
@@ -40,6 +41,9 @@ export default function AdminDashboard() {
           <TabsTrigger value="grupos" className="gap-2 font-bold">
             <Compass className="w-4 h-4" /> Grupos
           </TabsTrigger>
+          <TabsTrigger value="cotacoes" className="gap-2 font-bold">
+            <Plane className="w-4 h-4" /> Cotações Aéreas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="leads">
@@ -52,6 +56,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="grupos">
           <ManageGroups />
+        </TabsContent>
+
+        <TabsContent value="cotacoes">
+          <ManageAirlineQuotes />
         </TabsContent>
       </Tabs>
     </div>
