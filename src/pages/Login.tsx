@@ -13,7 +13,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
-import { Plane } from 'lucide-react'
+import { Plane, Info } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -43,7 +44,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md shadow-xl border-slate-200">
         <CardHeader className="text-center space-y-2">
           <div className="w-12 h-12 bg-teal-700 text-white rounded-xl flex items-center justify-center mx-auto shadow-md">
@@ -94,6 +95,22 @@ export default function Login() {
           </CardFooter>
         </form>
       </Card>
+
+      <div className="mt-6 w-full max-w-md">
+        <Alert className="border-amber-200 bg-amber-50">
+          <Info className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Credenciais de Administrador</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            <p className="text-sm">Acesse o painel administrativo com:</p>
+            <p className="text-sm mt-1">
+              <strong>E-mail:</strong> laura@lauraturismo.com.br
+            </p>
+            <p className="text-sm">
+              <strong>Senha:</strong> Laura@Skip
+            </p>
+          </AlertDescription>
+        </Alert>
+      </div>
     </div>
   )
 }

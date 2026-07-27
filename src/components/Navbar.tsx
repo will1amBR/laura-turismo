@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Plane, Menu, User, LogOut, ShieldCheck, Compass } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useScrollPosition } from '@/hooks/use-scroll-position'
@@ -18,7 +18,9 @@ export function Navbar() {
   const { user, isAuthenticated, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const scrolled = useScrollPosition(100)
+  const location = useLocation()
+  const isHome = location.pathname === '/'
+  const scrolled = useScrollPosition(100) || !isHome
 
   const handleLogout = () => {
     signOut()

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
 import { Plane } from 'lucide-react'
+import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -21,6 +22,7 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
@@ -37,19 +39,21 @@ export default function Register() {
       return
     }
 
+    setFieldErrors({})
     setLoading(true)
     const { error } = await signUp(email, password, name)
     setLoading(false)
 
     if (error) {
+      setFieldErrors(extractFieldErrors(error))
       toast({
         title: 'Erro ao cadastrar',
-        description: 'Verifique se o e-mail é válido e tente novamente.',
+        description: 'Verifique os campos e tente novamente.',
         variant: 'destructive',
       })
     } else {
       toast({ title: 'Conta criada com sucesso!' })
-      navigate('/meus-grupos')
+      navigate('/')
     }
   }
 
@@ -70,10 +74,11 @@ export default function Register() {
               <Input
                 id="name"
                 required
-                placeholder="Sua Nome"
+                placeholder="Seu Nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+              {fieldErrors.name && <p className="text-sm text-red-500">{fieldErrors.name}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="email">E-mail</Label>
@@ -85,6 +90,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {fieldErrors.email && <p className="text-sm text-red-500">{fieldErrors.email}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Senha (mínimo 8 caracteres)</Label>
@@ -96,6 +102,9 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {fieldErrors.password && (
+                <p className="text-sm text-red-500">{fieldErrors.password}</p>
+              )}
             </div>
             <div className="space-y-1">
               <Label htmlFor="confirmPassword">Confirmar Senha</Label>
