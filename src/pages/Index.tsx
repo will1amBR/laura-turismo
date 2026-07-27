@@ -12,6 +12,7 @@ import {
   Plane,
   Compass,
   Heart,
+  Phone,
 } from 'lucide-react'
 import { getPackages, PackageRecord, getPackageImageUrl } from '@/services/packages'
 import { getUpcomingGroups, GroupRecord } from '@/services/groups'
@@ -105,24 +106,26 @@ export default function Index() {
       if (filters.departureDate && g.start_date) {
         const groupStart = new Date(g.start_date)
         const filterDep = new Date(filters.departureDate)
-        if (groupStart > filterDep) return false
+        if (groupStart < filterDep) return false
       }
       if (filters.returnDate && g.end_date) {
         const groupEnd = new Date(g.end_date)
         const filterRet = new Date(filters.returnDate)
-        if (groupEnd < filterRet) return false
+        if (groupEnd > filterRet) return false
       }
       if (
         filters.departureAirport &&
         g.departure_airport &&
-        !g.departure_airport.toLowerCase().includes(filters.departureAirport.toLowerCase())
+        !g.departure_airport.toLowerCase().includes(filters.departureAirport.toLowerCase()) &&
+        !filters.departureAirport.toLowerCase().includes(g.departure_airport.toLowerCase())
       ) {
         return false
       }
       if (
         filters.arrivalAirport &&
         g.arrival_airport &&
-        !g.arrival_airport.toLowerCase().includes(filters.arrivalAirport.toLowerCase())
+        !g.arrival_airport.toLowerCase().includes(filters.arrivalAirport.toLowerCase()) &&
+        !filters.arrivalAirport.toLowerCase().includes(g.arrival_airport.toLowerCase())
       ) {
         return false
       }
@@ -192,7 +195,23 @@ export default function Index() {
                   Como Funciona
                 </Button>
               </a>
+              <a href="tel:+5511998170951">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-white border-emerald-400/60 hover:bg-emerald-500/20 bg-emerald-500/10 backdrop-blur gap-2"
+                >
+                  <Phone className="w-5 h-5" /> +55 11 99817-0951
+                </Button>
+              </a>
             </div>
+            <a
+              href="tel:+5511998170951"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mt-4 text-sm font-medium"
+            >
+              <Phone className="w-4 h-4" />
+              Fale com Laura: +55 11 99817-0951
+            </a>
           </div>
 
           {/* Search Filter in Hero */}
