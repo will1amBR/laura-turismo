@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getGroups, createGroup, deleteGroup, GroupRecord } from '@/services/groups'
 import { getPackages, PackageRecord } from '@/services/packages'
 import { useAuth } from '@/hooks/use-auth'
@@ -23,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Settings } from 'lucide-react'
 
 export function ManageGroups() {
   const { user } = useAuth()
@@ -163,14 +164,21 @@ export function ManageGroups() {
                 <CardTitle className="text-lg font-bold text-slate-900">{group.name}</CardTitle>
                 <p className="text-xs text-slate-500">{group.expand?.package?.title}</p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-red-500"
-                onClick={() => handleDelete(group.id)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex gap-1">
+                <Link to={`/grupo/${group.id}`}>
+                  <Button variant="ghost" size="icon" className="text-teal-700">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-500"
+                  onClick={() => handleDelete(group.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-slate-600">
               <p>

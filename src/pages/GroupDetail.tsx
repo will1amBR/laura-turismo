@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react'
-import {
-  Calendar,
-  Users,
-  CheckCircle,
-  Clock,
-  ShieldCheck,
-  Plus,
-  MapPin,
-  ArrowLeft,
-  Trash2,
-} from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft } from 'lucide-react'
 import { getGroup, GroupRecord } from '@/services/groups'
 import { getGroupMembers, updateMemberStatus, GroupMemberRecord } from '@/services/members'
-import { getGroupSchedules, createSchedule, DailyScheduleRecord } from '@/services/schedules'
+import {
+  getGroupSchedules,
+  createScheduleWithPhoto,
+  getSchedulePhotoUrl,
+  DailyScheduleRecord,
+} from '@/services/schedules'
 import { formatDate } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 import { useRealtime } from '@/hooks/use-realtime'
@@ -31,17 +26,19 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
+import { GroupChecklist } from '@/components/GroupChecklist'
+import { ChecklistManager } from '@/components/ChecklistManager'
+import { SchedulePhotoUpload } from '@/components/SchedulePhotoUpload'
 
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user, isAdmin } = useAuth()
+  const { isAdmin } = useAuth()
   const [group, setGroup] = useState<GroupRecord | null>(null)
   const [members, setMembers] = useState<GroupMemberRecord[]>([])
   const [schedules, setSchedules] = useState<DailyScheduleRecord[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Dialog state for adding schedule
   const [addDayOpen, setAddDayOpen] = useState(false)
   const [dayNumber, setDayNumber] = useState(1)
   const [dayTitle, setDayTitle] = useState('')
@@ -50,6 +47,7 @@ export default function GroupDetail() {
   const [lunch, setLunch] = useState('')
   const [dinner, setDinner] = useState('')
   const [reminderInput, setReminderInput] = useState('')
+  const [dayPhoto, setDayPhoto] = useState<File | null>(null)
 
   const loadData = async () => {
     if (!id) return
@@ -93,23 +91,25 @@ export default function GroupDetail() {
   const handleAddSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!id || !dayTitle.trim()) return
-
     try {
       const remindersArray = reminderInput
         .split('\n')
         .map((r) => r.trim())
         .filter(Boolean)
 
-      await createSchedule({
-        group: id,
-        day_number: Number(dayNumber),
-        title: dayTitle,
-        description: dayDesc,
-        breakfast,
-        lunch,
-        dinner,
-        reminders: JSON.stringify(remindersArray),
-      })
+      await createScheduleWithPhoto(
+        {
+          group: id,
+          day_number: Number(dayNumber),
+          title: dayTitle,
+          description: dayDesc,
+          breakfast,
+          lunch,
+          dinner,
+          reminders: JSON.stringify(remindersArray),
+        },
+        dayPhoto,
+      )
 
       toast({ title: 'Dia adicionado ao roteiro com sucesso!' })
       setAddDayOpen(false)
@@ -119,6 +119,7 @@ export default function GroupDetail() {
       setLunch('')
       setDinner('')
       setReminderInput('')
+      setDayPhoto(null)
       loadData()
     } catch {
       toast({ title: 'Erro ao criar dia no roteiro', variant: 'destructive' })
@@ -164,7 +165,6 @@ export default function GroupDetail() {
         <ArrowLeft className="w-4 h-4" /> Voltar para Meus Grupos
       </Button>
 
-      {/* Group Info Header */}
       <div className="bg-gradient-to-r from-teal-900 to-slate-900 text-white rounded-3xl p-6 md:p-8 space-y-4 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -186,8 +186,6 @@ export default function GroupDetail() {
             </span>
           </div>
         </div>
-
-        {/* Status Stepper */}
         <div className="pt-4 border-t border-white/10">
           <p className="text-xs font-semibold uppercase text-teal-200 mb-3">Progresso da Viagem</p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
@@ -214,94 +212,103 @@ export default function GroupDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Itinerary Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <MapPin className="w-6 h-6 text-teal-700" /> Roteiro do Grupo
             </h2>
-
-            {isAdmin && (
-              <Dialog open={addDayOpen} onOpenChange={setAddDayOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-teal-700 hover:bg-teal-800 text-white font-semibold gap-1 text-sm">
-                    <Plus className="w-4 h-4" /> Adicionar Dia
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Adicionar Dia ao Roteiro</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddSchedule} className="space-y-3 pt-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label>Número do Dia</Label>
-                        <Input
-                          type="number"
-                          required
-                          value={dayNumber}
-                          onChange={(e) => setDayNumber(Number(e.target.value))}
-                        />
-                      </div>
-                      <div>
-                        <Label>Título do Dia</Label>
-                        <Input
-                          required
-                          placeholder="Ex: City Tour"
-                          value={dayTitle}
-                          onChange={(e) => setDayTitle(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Descrição das atividades</Label>
-                      <Textarea
-                        value={dayDesc}
-                        onChange={(e) => setDayDesc(e.target.value)}
-                        placeholder="Detalhes do dia..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <Label className="text-xs">Café da Manhã</Label>
-                        <Input
-                          value={breakfast}
-                          onChange={(e) => setBreakfast(e.target.value)}
-                          placeholder="Incluso"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Almoço</Label>
-                        <Input
-                          value={lunch}
-                          onChange={(e) => setLunch(e.target.value)}
-                          placeholder="Livre"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Jantar</Label>
-                        <Input
-                          value={dinner}
-                          onChange={(e) => setDinner(e.target.value)}
-                          placeholder="Incluso"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Lembretes (um por linha)</Label>
-                      <Textarea
-                        value={reminderInput}
-                        onChange={(e) => setReminderInput(e.target.value)}
-                        placeholder="Levar passaporte&#10;Protetor solar"
-                      />
-                    </div>
-                    <Button type="submit" className="w-full bg-teal-700 text-white">
-                      Salvar Dia
+            <div className="flex items-center gap-2">
+              {isAdmin && <ChecklistManager groupId={group.id} />}
+              {isAdmin && (
+                <Dialog open={addDayOpen} onOpenChange={setAddDayOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-teal-700 hover:bg-teal-800 text-white font-semibold gap-1 text-sm">
+                      <Plus className="w-4 h-4" /> Adicionar Dia
                     </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            )}
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Adicionar Dia ao Roteiro</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddSchedule} className="space-y-3 pt-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label>Número do Dia</Label>
+                          <Input
+                            type="number"
+                            required
+                            value={dayNumber}
+                            onChange={(e) => setDayNumber(Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Título do Dia</Label>
+                          <Input
+                            required
+                            placeholder="Ex: City Tour"
+                            value={dayTitle}
+                            onChange={(e) => setDayTitle(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Descrição das atividades</Label>
+                        <Textarea
+                          value={dayDesc}
+                          onChange={(e) => setDayDesc(e.target.value)}
+                          placeholder="Detalhes do dia..."
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <Label className="text-xs">Café da Manhã</Label>
+                          <Input
+                            value={breakfast}
+                            onChange={(e) => setBreakfast(e.target.value)}
+                            placeholder="Incluso"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Almoço</Label>
+                          <Input
+                            value={lunch}
+                            onChange={(e) => setLunch(e.target.value)}
+                            placeholder="Livre"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Jantar</Label>
+                          <Input
+                            value={dinner}
+                            onChange={(e) => setDinner(e.target.value)}
+                            placeholder="Incluso"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Lembretes (um por linha)</Label>
+                        <Textarea
+                          value={reminderInput}
+                          onChange={(e) => setReminderInput(e.target.value)}
+                          placeholder="Levar passaporte&#10;Protetor solar"
+                        />
+                      </div>
+                      <div>
+                        <Label>Foto do destino (opcional)</Label>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setDayPhoto(e.target.files?.[0] ?? null)}
+                        />
+                      </div>
+                      <Button type="submit" className="w-full bg-teal-700 text-white">
+                        Salvar Dia
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
           </div>
 
           {schedules.length === 0 ? (
@@ -321,16 +328,26 @@ export default function GroupDetail() {
                     remindersList = []
                   }
                 }
-
+                const photoUrl = getSchedulePhotoUrl(sch)
                 return (
                   <Card key={sch.id} className="border-slate-200">
                     <CardHeader className="bg-slate-50 pb-3 border-b">
-                      <CardTitle className="text-lg text-teal-900 font-bold">{sch.title}</CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-teal-900 font-bold">
+                          {sch.title}
+                        </CardTitle>
+                        {isAdmin && <SchedulePhotoUpload scheduleId={sch.id} />}
+                      </div>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
                       <p className="text-sm text-slate-700 leading-relaxed">{sch.description}</p>
-
-                      {/* Alimentação */}
+                      {photoUrl && (
+                        <img
+                          src={photoUrl}
+                          alt={sch.title}
+                          className="w-full max-h-72 object-cover rounded-xl"
+                        />
+                      )}
                       {(sch.breakfast || sch.lunch || sch.dinner) && (
                         <div className="bg-teal-50/60 p-3 rounded-xl border border-teal-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                           <div>
@@ -347,8 +364,6 @@ export default function GroupDetail() {
                           </div>
                         </div>
                       )}
-
-                      {/* Reminders */}
                       {remindersList.length > 0 && (
                         <div className="space-y-2 pt-1">
                           <p className="text-xs font-bold text-slate-800 uppercase tracking-wide">
@@ -375,8 +390,8 @@ export default function GroupDetail() {
           )}
         </div>
 
-        {/* Members Column */}
         <div className="space-y-6">
+          <GroupChecklist groupId={group.id} />
           <Card>
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-lg text-slate-900 flex items-center justify-between">
@@ -410,7 +425,6 @@ export default function GroupDetail() {
                             Pendente
                           </Badge>
                         )}
-
                         {isAdmin && m.status === 'pendente' && (
                           <div className="flex gap-1">
                             <Button

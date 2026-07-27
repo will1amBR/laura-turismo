@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react'
-import { Calendar, Users, Share2, ArrowLeft, CheckCircle, Clock } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Calendar, Users, Share2, ArrowLeft, CheckCircle, Clock, Filter, X } from 'lucide-react'
 import { getPackage, PackageRecord, getPackageImageUrl } from '@/services/packages'
 import { getPackageGroups, GroupRecord } from '@/services/groups'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -9,6 +9,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 
 export default function PackageDetail() {
@@ -18,6 +27,11 @@ export default function PackageDetail() {
   const [pkg, setPkg] = useState<PackageRecord | null>(null)
   const [groups, setGroups] = useState<GroupRecord[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [minStartDate, setMinStartDate] = useState('')
+  const [maxEndDate, setMaxEndDate] = useState('')
+  const [minSpots, setMinSpots] = useState(0)
+  const [maxCapacity, setMaxCapacity] = useState('')
 
   useEffect(() => {
     if (!id) return
@@ -30,13 +44,29 @@ export default function PackageDetail() {
       .finally(() => setLoading(false))
   }, [id])
 
+  const filteredGroups = useMemo(() => {
+    return groups.filter((g) => {
+      if (minStartDate && new Date(g.start_date) < new Date(minStartDate)) return false
+      if (maxEndDate && new Date(g.end_date) > new Date(maxEndDate)) return false
+      const remaining = g.capacity - (g.current_members || 0)
+      if (minSpots > 0 && remaining < minSpots) return false
+      if (maxCapacity && g.capacity > Number(maxCapacity)) return false
+      return true
+    })
+  }, [groups, minStartDate, maxEndDate, minSpots, maxCapacity])
+
+  const hasActiveFilters = minStartDate || maxEndDate || minSpots > 0 || maxCapacity
+
+  const clearFilters = () => {
+    setMinStartDate('')
+    setMaxEndDate('')
+    setMinSpots(0)
+    setMaxCapacity('')
+  }
+
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: pkg?.title,
-        text: pkg?.description,
-        url: window.location.href,
-      })
+      navigator.share({ title: pkg?.title, text: pkg?.description, url: window.location.href })
     } else {
       navigator.clipboard.writeText(window.location.href)
       toast({ title: 'Link copiado para a área de transferência!' })
@@ -75,7 +105,6 @@ export default function PackageDetail() {
         <ArrowLeft className="w-4 h-4" /> Voltar
       </Button>
 
-      {/* Package Header Banner */}
       <div className="relative rounded-3xl overflow-hidden h-[300px] md:h-[400px] shadow-lg">
         <img src={getPackageImageUrl(pkg)} alt={pkg.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent flex items-end p-6 md:p-10">
@@ -94,7 +123,6 @@ export default function PackageDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Details */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
@@ -105,22 +133,91 @@ export default function PackageDetail() {
             </CardContent>
           </Card>
 
-          {/* Groups List */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <Users className="w-6 h-6 text-teal-700" /> Grupos com vagas abertas
             </h2>
 
-            {groups.length === 0 ? (
+            {groups.length > 0 && (
+              <Card className="border-slate-200 bg-slate-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Filter className="w-4 h-4 text-slate-500" />
+                    <h3 className="text-sm font-bold text-slate-700">Filtrar grupos</h3>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-auto text-xs h-7"
+                        onClick={clearFilters}
+                      >
+                        <X className="w-3 h-3" /> Limpar
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div>
+                      <Label className="text-xs">Saída a partir de</Label>
+                      <Input
+                        type="date"
+                        value={minStartDate}
+                        onChange={(e) => setMinStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Retorno até</Label>
+                      <Input
+                        type="date"
+                        value={maxEndDate}
+                        onChange={(e) => setMaxEndDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Vagas mínimas</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={minSpots || ''}
+                        onChange={(e) => setMinSpots(Number(e.target.value) || 0)}
+                        placeholder="Qualquer"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Capacidade máxima</Label>
+                      <Select value={maxCapacity} onValueChange={setMaxCapacity}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Qualquer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Qualquer</SelectItem>
+                          <SelectItem value="5">Até 5 pessoas</SelectItem>
+                          <SelectItem value="10">Até 10 pessoas</SelectItem>
+                          <SelectItem value="15">Até 15 pessoas</SelectItem>
+                          <SelectItem value="20">Até 20 pessoas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-3">
+                    {filteredGroups.length} grupo(s) encontrado(s)
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {filteredGroups.length === 0 ? (
               <Card className="p-8 text-center text-slate-600 bg-slate-50 border-dashed">
-                Não há grupos abertos para este pacote no momento.
+                {groups.length === 0
+                  ? 'Não há grupos abertos para este pacote no momento.'
+                  : 'Nenhum grupo corresponde aos filtros selecionados.'}
               </Card>
             ) : (
-              groups.map((group) => {
+              filteredGroups.map((group) => {
                 const percent = Math.min(
                   100,
                   Math.round((group.current_members / group.capacity) * 100),
                 )
+                const remaining = group.capacity - (group.current_members || 0)
                 return (
                   <Card
                     key={group.id}
@@ -150,6 +247,9 @@ export default function PackageDetail() {
                         <div className="flex justify-between text-xs text-slate-600 font-medium">
                           <span>
                             Inscritos: {group.current_members} de {group.capacity} pessoas
+                            {remaining > 0 && (
+                              <span className="text-emerald-600 ml-1">({remaining} vagas)</span>
+                            )}
                           </span>
                           <span>{percent}% preenchido</span>
                         </div>
@@ -173,7 +273,6 @@ export default function PackageDetail() {
           </div>
         </div>
 
-        {/* Pricing & Summary Sidebar */}
         <div className="space-y-6">
           <Card className="sticky top-24 border-teal-200 bg-teal-50/50 shadow-md">
             <CardHeader>
@@ -201,7 +300,6 @@ export default function PackageDetail() {
                   <Clock className="w-4 h-4 text-amber-600" /> Vagas limitadas por grupo
                 </p>
               </div>
-
               <Button
                 variant="outline"
                 onClick={handleShare}

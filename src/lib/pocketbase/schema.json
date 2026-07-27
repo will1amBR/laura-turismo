@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T19:17:26.958Z",
+  "generatedAt": "2026-07-27T19:26:34.832Z",
   "collections": [
     {
       "name": "users",
@@ -322,6 +322,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "photo",
+          "type": "file",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -385,6 +391,59 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "trip_checklist_items",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "group",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "groups"
+        },
+        {
+          "name": "item",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "is_required",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "order",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_checklist_group ON trip_checklist_items (`group`)"]
     }
   ]
 }
