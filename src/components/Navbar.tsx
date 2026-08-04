@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Plane, Menu, User, LogOut, ShieldCheck, Compass } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
-import { useScrollPosition } from '@/hooks/use-scroll-position'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -18,9 +17,6 @@ export function Navbar() {
   const { user, isAuthenticated, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const location = useLocation()
-  const isHome = location.pathname === '/'
-  const scrolled = useScrollPosition(100) || !isHome
 
   const handleLogout = () => {
     signOut()
@@ -28,28 +24,13 @@ export function Navbar() {
   }
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300',
-        scrolled ? 'bg-white shadow-md text-stone-900' : 'bg-transparent text-white',
-      )}
-    >
+    <header className="sticky top-0 z-50 w-full bg-white shadow-md text-stone-900">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link
           to="/"
-          className={cn(
-            'flex items-center gap-2 text-xl font-bold tracking-tight transition-colors',
-            scrolled ? 'text-stone-900' : 'text-white',
-          )}
+          className="flex items-center gap-2 text-xl font-bold tracking-tight text-stone-900 transition-colors"
         >
-          <div
-            className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-lg shadow transition-colors',
-              scrolled
-                ? 'bg-gradient-to-br from-amber-500 to-sky-600 text-white'
-                : 'bg-white/20 backdrop-blur text-white border border-white/30',
-            )}
-          >
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-sky-600 text-white shadow transition-colors">
             <Plane className="h-5 w-5" />
           </div>
           <span>Laura Turismo</span>
@@ -58,19 +39,13 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-6">
           <a
             href="/#pacotes"
-            className={cn(
-              'text-sm font-medium transition-colors',
-              scrolled ? 'text-stone-600 hover:text-amber-600' : 'text-white/90 hover:text-white',
-            )}
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
           >
             Pacotes
           </a>
           <a
             href="/#como-funciona"
-            className={cn(
-              'text-sm font-medium transition-colors',
-              scrolled ? 'text-stone-600 hover:text-amber-600' : 'text-white/90 hover:text-white',
-            )}
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
           >
             Como Funciona
           </a>
@@ -78,10 +53,7 @@ export function Navbar() {
           {isAuthenticated && (
             <Link
               to="/meus-grupos"
-              className={cn(
-                'text-sm font-medium hover:underline flex items-center gap-1',
-                scrolled ? 'text-amber-600' : 'text-white',
-              )}
+              className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:underline"
             >
               <Compass className="h-4 w-4" /> Meus Grupos
             </Link>
@@ -103,12 +75,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn(
-                    'gap-2 transition-colors',
-                    scrolled
-                      ? 'border-stone-300 hover:bg-stone-50'
-                      : 'border-white/40 text-white hover:bg-white/10 bg-transparent',
-                  )}
+                  className="gap-2 border-stone-300 transition-colors hover:bg-stone-50"
                 >
                   <User className="h-4 w-4" />
                   <span className="max-w-[120px] truncate">{user?.name || user?.email}</span>
@@ -134,10 +101,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 onClick={() => navigate('/entrar')}
-                className={cn(
-                  'transition-colors',
-                  scrolled ? 'text-stone-700 hover:text-stone-900' : 'text-white hover:bg-white/10',
-                )}
+                className="text-stone-700 transition-colors hover:text-stone-900"
               >
                 Entrar
               </Button>
@@ -154,14 +118,7 @@ export function Navbar() {
         <div className="flex md:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className={cn(
-                  'transition-colors',
-                  scrolled ? 'border-stone-300' : 'border-white/40 text-white bg-white/10',
-                )}
-              >
+              <Button variant="outline" size="icon" className="border-stone-300 transition-colors">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
