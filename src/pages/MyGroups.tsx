@@ -4,6 +4,7 @@ import { Compass, Calendar, ChevronRight, CheckCircle2, Clock } from 'lucide-rea
 import { useAuth } from '@/hooks/use-auth'
 import { getUserMemberships, GroupMemberRecord } from '@/services/members'
 import { formatDate } from '@/lib/utils'
+import { GroupCountdownBadge } from '@/components/GroupCountdownBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -91,22 +92,30 @@ export default function MyGroups() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-sm text-slate-600 space-y-1">
+                  <div className="text-sm text-slate-600 space-y-2">
                     <p className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-teal-600" />
                       {formatDate(group.start_date)} até {formatDate(group.end_date)}
                     </p>
-                    <div className="flex items-center gap-2 pt-1">
-                      <span className="text-xs text-slate-500">Inscrição:</span>
-                      {item.status === 'aprovado' ? (
-                        <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Aprovada
-                        </span>
-                      ) : (
-                        <span className="text-xs font-bold text-amber-600 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> Aguardando aprovação
-                        </span>
-                      )}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500">Inscrição:</span>
+                        {item.status === 'aprovado' ? (
+                          <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Aprovada
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-amber-600 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" /> Aguardando aprovação
+                          </span>
+                        )}
+                      </div>
+                      <GroupCountdownBadge
+                        startDateStr={group.start_date}
+                        endDateStr={group.end_date}
+                        status={group.status}
+                        compact
+                      />
                     </div>
                   </div>
 

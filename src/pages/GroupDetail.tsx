@@ -8,7 +8,7 @@ import { formatCurrency } from '@/lib/utils'
 import {
   getGroupSchedules,
   createScheduleWithPhoto,
-  getSchedulePhotoUrl,
+  getSchedulePhotoUrls,
   DailyScheduleRecord,
 } from '@/services/schedules'
 import { formatDate } from '@/lib/utils'
@@ -31,6 +31,8 @@ import { toast } from '@/hooks/use-toast'
 import { GroupChecklist } from '@/components/GroupChecklist'
 import { ChecklistManager } from '@/components/ChecklistManager'
 import { SchedulePhotoUpload } from '@/components/SchedulePhotoUpload'
+import { ScheduleGallery } from '@/components/ScheduleGallery'
+import { GroupTimeline } from '@/components/GroupTimeline'
 
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>()
@@ -50,7 +52,7 @@ export default function GroupDetail() {
   const [lunch, setLunch] = useState('')
   const [dinner, setDinner] = useState('')
   const [reminderInput, setReminderInput] = useState('')
-  const [dayPhoto, setDayPhoto] = useState<File | null>(null)
+  const [dayPhotos, setDayPhotos] = useState<File[]>([])
 
   const loadData = async () => {
     if (!id) return
@@ -108,7 +110,7 @@ export default function GroupDetail() {
       await createScheduleWithPhoto(
         {
           group: id,
-          day_number: Number(dayNumber),
+          day_number: Number(dayNumber) || schedules.length + 1,
           title: dayTitle,
           description: dayDesc,
           breakfast,
@@ -116,7 +118,7 @@ export default function GroupDetail() {
           dinner,
           reminders: JSON.stringify(remindersArray),
         },
-        dayPhoto,
+        dayPhotos,
       )
 
       toast({ title: 'Dia adicionado ao roteiro com sucesso!' })
@@ -127,7 +129,7 @@ export default function GroupDetail() {
       setLunch('')
       setDinner('')
       setReminderInput('')
-      setDayPhoto(null)
+      setDayPhotos([])
       loadData()
     } catch {
       toast({ title: 'Erro ao criar dia no roteiro', variant: 'destructive' })
@@ -195,27 +197,7 @@ export default function GroupDetail() {
           </div>
         </div>
         <div className="pt-4 border-t border-white/10">
-          <p className="text-xs font-semibold uppercase text-teal-200 mb-3">Progresso da Viagem</p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {steps.map((step, idx) => {
-              const isDone = idx < currentStep
-              const isCurrent = idx === currentStep
-              return (
-                <div
-                  key={step.key}
-                  className={`p-2.5 rounded-xl text-center text-xs font-bold transition-all border ${
-                    isDone
-                      ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40'
-                      : isCurrent
-                        ? 'bg-amber-400 text-slate-950 border-amber-300 shadow'
-                        : 'bg-white/5 text-slate-400 border-white/5'
-                  }`}
-                >
-                  {step.label}
-                </div>
-              )
-            })}
-          </div>
+          <GroupTimeline status={group.status} hasSchedule={schedules.length > 0} />
         </div>
       </div>
 
@@ -302,14 +284,24 @@ export default function GroupDetail() {
                         />
                       </div>
                       <div>
-                        <Label>Foto do destino (opcional)</Label>
+                        <Label>Fotos do destino (opcional, selecione uma ou mais)</Label>
                         <Input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => setDayPhoto(e.target.files?.[0] ?? null)}
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              setDayPhotos(Array.from(e.target.files))
+                            }
+                          }}
                         />
+                        {dayPhotos.length > 0 && (
+                          <p className="text-xs text-teal-700 font-semibold mt-1">
+                            {dayPhotos.length} foto(s) selecionada(s)
+                          </p>
+                        )}
                       </div>
-                      <Button type="submit" className="w-full bg-teal-700 text-white">
+                      <Button type="submit" className="w-full bg-teal-700 text-white font-bold">
                         Salvar Dia
                       </Button>
                     </form>
@@ -372,26 +364,25 @@ export default function GroupDetail() {
                     remindersList = []
                   }
                 }
-                const photoUrl = getSchedulePhotoUrl(sch)
+                const photoUrls = getSchedulePhotoUrls(sch)
                 return (
                   <Card key={sch.id} className="border-slate-200">
                     <CardHeader className="bg-slate-50 pb-3 border-b">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg text-teal-900 font-bold">
-                          {sch.title}
+                          Dia {sch.day_number}: {sch.title}
                         </CardTitle>
                         {isAdmin && <SchedulePhotoUpload scheduleId={sch.id} />}
                       </div>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
                       <p className="text-sm text-slate-700 leading-relaxed">{sch.description}</p>
-                      {photoUrl && (
-                        <img
-                          src={photoUrl}
-                          alt={sch.title}
-                          className="w-full max-h-72 object-cover rounded-xl"
-                        />
+
+                      {/* Multiple photos carousel/gallery with lightbox */}
+                      {photoUrls.length > 0 && (
+                        <ScheduleGallery photos={photoUrls} title={sch.title} />
                       )}
+
                       {(sch.breakfast || sch.lunch || sch.dinner) && (
                         <div className="bg-teal-50/60 p-3 rounded-xl border border-teal-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                           <div>

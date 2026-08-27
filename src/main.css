@@ -289,16 +289,19 @@
   }
 
   @keyframes hero-zoom {
-    from {
+    0% {
       transform: scale(1);
     }
-    to {
-      transform: scale(1.15);
+    100% {
+      transform: scale(1.08);
     }
   }
 
   .animate-hero-zoom {
-    animation: hero-zoom 20s ease-in-out infinite alternate;
+    animation: hero-zoom 16s ease-in-out infinite alternate;
+    will-change: transform;
+    transform-origin: center center;
+    backface-visibility: hidden;
   }
 
   .scrollbar-hide::-webkit-scrollbar {

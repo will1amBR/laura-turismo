@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge'
 import { LeadModal } from '@/components/LeadModal'
 import { FlightSearchFilter, FlightFilterValues } from '@/components/FlightSearchFilter'
 import { TestimonialsCarousel } from '@/components/TestimonialsCarousel'
+import { GroupCountdownBadge } from '@/components/GroupCountdownBadge'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -271,9 +272,18 @@ export default function Index() {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-3 flex-1">
-                    <div className="flex items-center gap-2 text-sm text-stone-600">
-                      <Calendar className="w-4 h-4 text-sky-600" />
-                      {formatDate(group.start_date)} — {formatDate(group.end_date)}
+                    <div className="flex items-center justify-between gap-2 text-sm text-stone-600">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-sky-600" />
+                        {formatDate(group.start_date)} — {formatDate(group.end_date)}
+                      </div>
+                    </div>
+                    <div>
+                      <GroupCountdownBadge
+                        startDateStr={group.start_date}
+                        endDateStr={group.end_date}
+                        status={group.status}
+                      />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {group.departure_airport && (

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGroups, createGroup, deleteGroup, GroupRecord } from '@/services/groups'
+import { getGroups, createGroup, updateGroup, deleteGroup, GroupRecord } from '@/services/groups'
 import { getPackages, PackageRecord } from '@/services/packages'
 import { useAuth } from '@/hooks/use-auth'
 import { formatDate } from '@/lib/utils'
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import { Plus, Trash2, Settings } from 'lucide-react'
+import { Plus, Trash2, Settings, Pencil } from 'lucide-react'
 import { DEPARTURE_AIRPORTS } from '@/components/FlightSearchFilter'
 
 export function ManageGroups() {
@@ -32,7 +32,10 @@ export function ManageGroups() {
   const [groups, setGroups] = useState<GroupRecord[]>([])
   const [packages, setPackages] = useState<PackageRecord[]>([])
   const [openModal, setOpenModal] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingGroup, setEditingGroup] = useState<GroupRecord | null>(null)
 
+  // Create form state
   const [packageId, setPackageId] = useState('')
   const [name, setName] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -40,6 +43,17 @@ export function ManageGroups() {
   const [capacity, setCapacity] = useState(12)
   const [departureAirport, setDepartureAirport] = useState('')
   const [arrivalAirport, setArrivalAirport] = useState('')
+
+  // Edit form state
+  const [editPackageId, setEditPackageId] = useState('')
+  const [editName, setEditName] = useState('')
+  const [editStartDate, setEditStartDate] = useState('')
+  const [editEndDate, setEditEndDate] = useState('')
+  const [editCapacity, setEditCapacity] = useState(12)
+  const [editCurrentMembers, setEditCurrentMembers] = useState(0)
+  const [editDepartureAirport, setEditDepartureAirport] = useState('')
+  const [editArrivalAirport, setEditArrivalAirport] = useState('')
+  const [editStatus, setEditStatus] = useState<GroupRecord['status']>('em_formacao')
 
   const loadData = () => {
     getGroups()
@@ -62,6 +76,45 @@ export function ManageGroups() {
     setCapacity(12)
     setDepartureAirport('')
     setArrivalAirport('')
+  }
+
+  const handleOpenEdit = (group: GroupRecord) => {
+    setEditingGroup(group)
+    setEditPackageId(group.package || '')
+    setEditName(group.name || '')
+    setEditStartDate(group.start_date ? group.start_date.substring(0, 10) : '')
+    setEditEndDate(group.end_date ? group.end_date.substring(0, 10) : '')
+    setEditCapacity(group.capacity || 12)
+    setEditCurrentMembers(group.current_members || 0)
+    setEditDepartureAirport(group.departure_airport || '')
+    setEditArrivalAirport(group.arrival_airport || '')
+    setEditStatus(group.status || 'em_formacao')
+    setEditModalOpen(true)
+  }
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingGroup) return
+
+    try {
+      await updateGroup(editingGroup.id, {
+        package: editPackageId,
+        name: editName,
+        start_date: editStartDate ? new Date(editStartDate).toISOString() : '',
+        end_date: editEndDate ? new Date(editEndDate).toISOString() : '',
+        capacity: Number(editCapacity),
+        current_members: Number(editCurrentMembers),
+        status: editStatus,
+        departure_airport: editDepartureAirport,
+        arrival_airport: editArrivalAirport,
+      })
+      toast({ title: 'Grupo atualizado com sucesso!' })
+      setEditModalOpen(false)
+      setEditingGroup(null)
+      loadData()
+    } catch {
+      toast({ title: 'Erro ao atualizar grupo', variant: 'destructive' })
+    }
   }
 
   const handleCreateGroup = async (e: React.FormEvent) => {
@@ -203,7 +256,16 @@ export function ManageGroups() {
                 <p className="text-xs text-slate-500">{group.expand?.package?.title}</p>
               </div>
               <div className="flex gap-1">
-                <Link to={`/grupo/${group.id}`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                  title="Editar Grupo"
+                  onClick={() => handleOpenEdit(group)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Link to={`/grupo/${group.id}`} title="Ver / Gerenciar Roteiro">
                   <Button variant="ghost" size="icon" className="text-teal-700">
                     <Settings className="w-4 h-4" />
                   </Button>
@@ -211,7 +273,8 @@ export function ManageGroups() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-red-500"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  title="Excluir Grupo"
                   onClick={() => handleDelete(group.id)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -240,6 +303,135 @@ export function ManageGroups() {
           </Card>
         ))}
       </div>
+
+      {/* Edit Group Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Grupo de Viagem</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="space-y-3 pt-2">
+            <div>
+              <Label>Pacote</Label>
+              <Select value={editPackageId} onValueChange={setEditPackageId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o pacote..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {packages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Nome do Grupo</Label>
+              <Input
+                required
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Ex: Grupo Especial Neve 2026"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Data de Início</Label>
+                <Input
+                  type="date"
+                  value={editStartDate}
+                  onChange={(e) => setEditStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Data de Fim</Label>
+                <Input
+                  type="date"
+                  value={editEndDate}
+                  onChange={(e) => setEditEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Capacidade Total</Label>
+                <Input
+                  type="number"
+                  required
+                  value={editCapacity}
+                  onChange={(e) => setEditCapacity(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <Label>Vagas Ocupadas</Label>
+                <Input
+                  type="number"
+                  required
+                  value={editCurrentMembers}
+                  onChange={(e) => setEditCurrentMembers(Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Status do Grupo</Label>
+              <Select
+                value={editStatus}
+                onValueChange={(val) => setEditStatus(val as GroupRecord['status'])}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="em_formacao">🟡 Em Formação</SelectItem>
+                  <SelectItem value="confirmado">🟢 Confirmado</SelectItem>
+                  <SelectItem value="em_andamento">✈️ Em Andamento</SelectItem>
+                  <SelectItem value="finalizado">✅ Finalizado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Aeroporto de Saída</Label>
+              <Select value={editDepartureAirport} onValueChange={setEditDepartureAirport}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o aeroporto de saída..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEPARTURE_AIRPORTS.map((airport) => (
+                    <SelectItem key={airport} value={airport}>
+                      {airport}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Aeroporto de Chegada</Label>
+              <Input
+                value={editArrivalAirport}
+                onChange={(e) => setEditArrivalAirport(e.target.value)}
+                placeholder="Ex: Santiago (SCL)"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-1/2"
+                onClick={() => setEditModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="w-1/2 bg-teal-700 hover:bg-teal-800 text-white font-bold"
+              >
+                Salvar Alterações
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

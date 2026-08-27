@@ -37,6 +37,12 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
+          <Link
+            to="/sobre"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
+          >
+            Sobre a Laura
+          </Link>
           <a
             href="/#pacotes"
             className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
@@ -49,6 +55,12 @@ export function Navbar() {
           >
             Como Funciona
           </a>
+          <Link
+            to="/faq"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
+          >
+            Dúvidas (FAQ)
+          </Link>
 
           {isAuthenticated && (
             <Link
@@ -129,6 +141,13 @@ export function Navbar() {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4 mt-6">
+                <Link
+                  to="/sobre"
+                  onClick={() => setOpen(false)}
+                  className="text-base font-medium py-2 border-b"
+                >
+                  Sobre a Laura
+                </Link>
                 <a
                   href="/#pacotes"
                   onClick={() => setOpen(false)}
@@ -143,6 +162,13 @@ export function Navbar() {
                 >
                   Como Funciona
                 </a>
+                <Link
+                  to="/faq"
+                  onClick={() => setOpen(false)}
+                  className="text-base font-medium py-2 border-b"
+                >
+                  Dúvidas (FAQ)
+                </Link>
 
                 {isAuthenticated && (
                   <Link
