@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft, Plane, Sparkles, HelpCircle } from 'lucide-react'
+import {
+  Calendar,
+  Users,
+  CheckCircle,
+  Plus,
+  MapPin,
+  ArrowLeft,
+  Plane,
+  Sparkles,
+  HelpCircle,
+} from 'lucide-react'
 import { getGroup, GroupRecord } from '@/services/groups'
 import { getGroupMembers, updateMemberStatus, GroupMemberRecord } from '@/services/members'
 import { getGroupQuotes, AirlineQuoteRecord } from '@/services/airline-quotes'
@@ -33,6 +43,7 @@ import { ChecklistManager } from '@/components/ChecklistManager'
 import { SchedulePhotoUpload } from '@/components/SchedulePhotoUpload'
 import { ScheduleGallery } from '@/components/ScheduleGallery'
 import { GroupTimeline } from '@/components/GroupTimeline'
+import { BookingOnboardingModal } from '@/components/BookingOnboardingModal'
 
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>()
@@ -208,9 +219,12 @@ export default function GroupDetail() {
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-900">Como funciona o acompanhamento do seu grupo?</h4>
+            <h4 className="text-sm font-bold text-slate-900">
+              Como funciona o acompanhamento do seu grupo?
+            </h4>
             <p className="text-xs text-slate-600">
-              Veja o passo a passo de confirmação de vagas, roteiros diários, alimentação, documentos e dúvidas.
+              Veja o passo a passo de confirmação de vagas, roteiros diários, alimentação,
+              documentos e dúvidas.
             </p>
           </div>
         </div>
@@ -518,6 +532,6 @@ export default function GroupDetail() {
         groupName={group?.name}
         packageTitle={group?.expand?.package?.title}
       />
-    </Layout>
+    </div>
   )
 }
