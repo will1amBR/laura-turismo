@@ -3,8 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   Plane,
   Menu,
-  X,
-  User,
   LogOut,
   ShieldCheck,
   Compass,
@@ -58,68 +56,22 @@ export function Navbar() {
           <span className="font-extrabold tracking-tight">Laura Turismo</span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) =>
-            link.isRouter ? (
-              <Link
-                key={link.title}
-                to={link.href}
-                className={`text-sm font-medium transition-colors hover:text-amber-600 ${
-                  location.pathname === link.href
-                    ? 'text-amber-600 font-semibold'
-                    : 'text-stone-600'
-                }`}
-              >
-                {link.title}
-              </Link>
-            ) : (
-              <a
-                key={link.title}
-                href={link.href}
-                className="text-sm font-medium text-stone-600 transition-colors hover:text-amber-600"
-              >
-                {link.title}
-              </a>
-            ),
-          )}
-
-          {isAuthenticated && (
-            <Link
-              to="/meus-grupos"
-              className={`flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-amber-700 ${
-                location.pathname === '/meus-grupos'
-                  ? 'text-amber-600 font-bold underline'
-                  : 'text-amber-600 font-medium'
-              }`}
-            >
-              <Compass className="h-4 w-4" /> Meus Grupos
-            </Link>
-          )}
-
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="text-sm font-semibold text-amber-700 hover:text-amber-800 flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors shadow-sm"
-            >
-              <ShieldCheck className="h-4 w-4 text-amber-600" /> Painel Admin
-            </Link>
-          )}
-        </nav>
-
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right Action Area: Auth Buttons (Entrar, Cadastre-se) + Hamburger Menu Trigger */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="gap-2 border-stone-300 transition-colors hover:bg-stone-50 max-w-[200px]"
+                  size="sm"
+                  className="gap-2 border-stone-300 transition-colors hover:bg-stone-50 max-w-[160px] sm:max-w-[210px] h-9 sm:h-10 px-2.5 sm:px-3 text-xs sm:text-sm font-medium"
                 >
-                  <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+                  <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">
                     {(user?.name || user?.email || 'U')[0].toUpperCase()}
                   </div>
-                  <span className="truncate">{user?.name || user?.email}</span>
+                  <span className="truncate hidden xs:inline sm:inline">
+                    {user?.name || user?.email}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-1.5">
@@ -147,33 +99,34 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 variant="ghost"
+                size="sm"
                 onClick={() => navigate('/entrar')}
-                className="text-stone-700 transition-colors hover:text-stone-900 font-medium"
+                className="text-stone-700 hover:text-amber-700 hover:bg-amber-50/60 font-semibold text-xs sm:text-sm px-2.5 sm:px-3.5 h-9 sm:h-10 transition-colors"
               >
                 Entrar
               </Button>
               <Button
-                className="bg-gradient-to-r from-amber-500 to-sky-600 hover:from-amber-600 hover:to-sky-700 text-white font-semibold shadow-md transition-all duration-300 hover:shadow-lg"
+                size="sm"
+                className="bg-gradient-to-r from-amber-500 to-sky-600 hover:from-amber-600 hover:to-sky-700 text-white font-semibold shadow-sm hover:shadow-md transition-all text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10"
                 onClick={() => navigate('/cadastrar')}
               >
                 Cadastre-se
               </Button>
-            </>
+            </div>
           )}
-        </div>
 
-        {/* Mobile Hamburger Menu (Clean & Intuitive) */}
-        <div className="flex md:hidden">
+          {/* Unified Hamburger Menu Button for all screen sizes */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                aria-label="Abrir Menu de Navegação"
-                className="h-10 w-10 border-stone-300 text-stone-800 hover:bg-stone-100 rounded-xl transition-colors"
+                aria-label="Menu de Navegação"
+                title="Menu"
+                className="h-9 w-9 sm:h-10 sm:w-10 border-stone-300 text-stone-800 hover:bg-stone-100 hover:border-amber-400 rounded-xl transition-all shadow-xs"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -183,7 +136,7 @@ export function Navbar() {
               className="w-[85vw] max-w-sm p-0 flex flex-col justify-between bg-white border-l border-stone-200"
             >
               <div>
-                <SheetHeader className="p-5 border-b border-stone-100 bg-stone-50/70">
+                <SheetHeader className="p-5 border-b border-stone-100 bg-stone-50/80">
                   <SheetTitle className="flex items-center gap-2.5 text-stone-900 text-lg font-bold text-left">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-sky-600 text-white shadow">
                       <Plane className="h-4 w-4" />
@@ -192,7 +145,7 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
 
-                {/* User status card on top of menu */}
+                {/* User status card inside menu if authenticated */}
                 {isAuthenticated && (
                   <div className="m-4 p-3 bg-amber-50/70 rounded-xl border border-amber-200/80 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center shrink-0">
@@ -210,7 +163,7 @@ export function Navbar() {
                 {/* Navigation links */}
                 <div className="px-4 py-3 space-y-1">
                   <p className="px-3 py-1.5 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                    Navegação
+                    Menu & Roteiros
                   </p>
                   {navLinks.map((link) => {
                     const Icon = link.icon
@@ -219,7 +172,7 @@ export function Navbar() {
                         key={link.title}
                         to={link.href}
                         onClick={() => setOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-colors ${
                           location.pathname === link.href
                             ? 'bg-amber-50 text-amber-700 font-bold'
                             : 'text-stone-700 hover:bg-stone-100'
@@ -233,7 +186,7 @@ export function Navbar() {
                         key={link.title}
                         href={link.href}
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors"
+                        className="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors"
                       >
                         <Icon className="w-4 h-4 text-stone-500 shrink-0" />
                         <span>{link.title}</span>
@@ -241,32 +194,37 @@ export function Navbar() {
                     )
                   })}
 
-                  {isAuthenticated && (
-                    <Link
-                      to="/meus-grupos"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 transition-colors mt-2"
-                    >
-                      <Compass className="w-4 h-4 text-sky-600 shrink-0" />
-                      <span>Área do Cliente (Meus Grupos)</span>
-                    </Link>
-                  )}
+                  <div className="pt-2">
+                    <p className="px-3 py-1.5 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                      Acesso Rápido
+                    </p>
+                    {isAuthenticated && (
+                      <Link
+                        to="/meus-grupos"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 transition-colors mb-1.5"
+                      >
+                        <Compass className="w-4 h-4 text-sky-600 shrink-0" />
+                        <span>Área do Cliente (Meus Grupos)</span>
+                      </Link>
+                    )}
 
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors mt-2"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Painel Admin</span>
-                    </Link>
-                  )}
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Painel Admin</span>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Bottom Actions */}
-              <div className="p-4 border-t border-stone-200 bg-stone-50/50 space-y-2">
+              <div className="p-4 border-t border-stone-200 bg-stone-50/60 space-y-2">
                 <a
                   href="https://wa.me/5511998170951?text=Ol%C3%A1%20Laura!"
                   target="_blank"
