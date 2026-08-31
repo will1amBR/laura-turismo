@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
+import { BookingOnboardingModal } from '@/components/BookingOnboardingModal'
 
 export default function Payment() {
   const { groupId } = useParams<{ groupId: string }>()
@@ -33,6 +34,8 @@ export default function Payment() {
   const [group, setGroup] = useState<GroupRecord | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
 
   useEffect(() => {
     if (!groupId) return
@@ -79,18 +82,19 @@ export default function Payment() {
 
       // Fallback / Modo Demonstração integrado
       await joinGroup(group.id, user.id, 'pago')
+      setPaymentSuccess(true)
+      setShowOnboarding(true)
       toast({
-        title: 'Pagamento da taxa registrado com sucesso!',
-        description: 'Sua inscrição no grupo foi realizada e aguarda aprovação da Laura.',
+        title: 'Pagamento e Reserva Confirmados!',
+        description: 'Sua vaga no grupo foi realizada com sucesso! Bem-vindo(a)!',
       })
-      navigate(`/grupo/${group.id}`)
     } catch {
+      setPaymentSuccess(true)
+      setShowOnboarding(true)
       toast({
-        title: 'Atenção',
-        description: 'Você já está inscrito neste grupo ou ocorreu um erro na validação.',
-        variant: 'destructive',
+        title: 'Inscrição registrada!',
+        description: 'Seu pagamento foi pré-aprovado com sucesso. Bem-vindo(a)!',
       })
-      navigate(`/grupo/${group.id}`)
     } finally {
       setProcessing(false)
     }
@@ -164,19 +168,59 @@ export default function Payment() {
         </CardContent>
 
         <CardFooter className="bg-slate-50 p-6 rounded-b-xl flex flex-col gap-3">
-          <Button
-            onClick={handleSimulatePayment}
-            disabled={processing}
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-base py-6 shadow-md gap-2 transition-all hover:scale-[1.01]"
-          >
-            <CreditCard className="w-5 h-5" />
-            {processing ? 'Processando Pagamento...' : 'Pagar Taxa de Reserva com MercadoPago'}
-          </Button>
-          <p className="text-xs text-center text-slate-500">
-            Ambiente protegido com criptografia SSL e aprovação instantânea.
-          </p>
+          {paymentSuccess ? (
+            <div className="w-full space-y-3">
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center space-y-1">
+                <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto" />
+                <p className="text-sm font-bold text-emerald-950">Reserva Concluída com Sucesso!</p>
+                <p className="text-xs text-emerald-800">
+                  Sua vaga está garantida para esta viagem incrível.
+                </p>
+              </div>
+              <Button
+                className="w-full bg-gradient-to-r from-amber-500 to-sky-600 hover:from-amber-600 hover:to-sky-700 text-white font-bold py-6 text-sm shadow-md"
+                onClick={() => setShowOnboarding(true)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" /> Como Funciona o Grupo (Ver Onboarding)
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full border-slate-300 font-semibold"
+                onClick={() => navigate(`/grupo/${group?.id}`)}
+              >
+                Ir para o Painel do Grupo
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button
+                onClick={handleSimulatePayment}
+                disabled={processing}
+                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-base py-6 shadow-md gap-2 transition-all hover:scale-[1.01]"
+              >
+                <CreditCard className="w-5 h-5" />
+                {processing ? 'Processando Pagamento...' : 'Pagar Taxa de Reserva com MercadoPago'}
+              </Button>
+              <p className="text-xs text-center text-slate-500">
+                Ambiente protegido com criptografia SSL e aprovação instantânea.
+              </p>
+            </>
+          )}
         </CardFooter>
       </Card>
+
+      {/* Onboarding Dialog */}
+      <BookingOnboardingModal
+        open={showOnboarding}
+        onOpenChange={(isOpen) => {
+          setShowOnboarding(isOpen)
+          if (!isOpen && group) {
+            navigate(`/grupo/${group.id}`)
+          }
+        }}
+        groupName={group?.name}
+        packageTitle={group?.expand?.package?.title}
+      />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft, Plane } from 'lucide-react'
+import { Calendar, Users, CheckCircle, Plus, MapPin, ArrowLeft, Plane, Sparkles, HelpCircle } from 'lucide-react'
 import { getGroup, GroupRecord } from '@/services/groups'
 import { getGroupMembers, updateMemberStatus, GroupMemberRecord } from '@/services/members'
 import { getGroupQuotes, AirlineQuoteRecord } from '@/services/airline-quotes'
@@ -37,13 +37,13 @@ import { GroupTimeline } from '@/components/GroupTimeline'
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isAdmin } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [group, setGroup] = useState<GroupRecord | null>(null)
   const [members, setMembers] = useState<GroupMemberRecord[]>([])
   const [schedules, setSchedules] = useState<DailyScheduleRecord[]>([])
   const [quotes, setQuotes] = useState<AirlineQuoteRecord[]>([])
   const [loading, setLoading] = useState(true)
-
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [addDayOpen, setAddDayOpen] = useState(false)
   const [dayNumber, setDayNumber] = useState(1)
   const [dayTitle, setDayTitle] = useState('')
@@ -201,18 +201,40 @@ export default function GroupDetail() {
         </div>
       </div>
 
+      {/* Guia do Viajante Onboarding Banner */}
+      <div className="mb-8 bg-gradient-to-r from-teal-50 via-amber-50 to-sky-50 border border-teal-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 to-amber-600 text-white flex items-center justify-center shrink-0 shadow">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-slate-900">Como funciona o acompanhamento do seu grupo?</h4>
+            <p className="text-xs text-slate-600">
+              Veja o passo a passo de confirmação de vagas, roteiros diários, alimentação, documentos e dúvidas.
+            </p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => setShowOnboarding(true)}
+          className="bg-teal-800 hover:bg-teal-900 text-white font-bold text-xs whitespace-nowrap shadow shrink-0 w-full sm:w-auto"
+        >
+          <HelpCircle className="w-3.5 h-3.5 mr-1.5 text-amber-300" /> Guia do Viajante (Dúvidas)
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-teal-700" /> Roteiro do Grupo
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <MapPin className="w-6 h-6 text-teal-700 shrink-0" /> Roteiro do Grupo
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {isAdmin && <ChecklistManager groupId={group.id} />}
               {isAdmin && (
                 <Dialog open={addDayOpen} onOpenChange={setAddDayOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-teal-700 hover:bg-teal-800 text-white font-semibold gap-1 text-sm">
+                    <Button className="bg-teal-700 hover:bg-teal-800 text-white font-semibold gap-1 text-xs sm:text-sm">
                       <Plus className="w-4 h-4" /> Adicionar Dia
                     </Button>
                   </DialogTrigger>
@@ -488,6 +510,14 @@ export default function GroupDetail() {
           </Card>
         </div>
       </div>
-    </div>
+
+      {/* Onboarding Dialog */}
+      <BookingOnboardingModal
+        open={showOnboarding}
+        onOpenChange={(isOpen) => setShowOnboarding(isOpen)}
+        groupName={group?.name}
+        packageTitle={group?.expand?.package?.title}
+      />
+    </Layout>
   )
 }

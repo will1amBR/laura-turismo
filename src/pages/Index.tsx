@@ -156,7 +156,7 @@ export default function Index() {
             className="absolute inset-0 bg-cover bg-center animate-hero-zoom"
             style={{
               backgroundImage:
-                "url('https://img.usecurling.com/p/1920/1080?q=chile%20andes%20mountains')",
+                "url('https://img.usecurling.com/p/1920/1080?q=santiago%20andes%20mountains')",
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />

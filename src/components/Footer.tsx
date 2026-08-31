@@ -30,7 +30,7 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="min-w-0">
             <h3 className="text-base font-semibold text-slate-200 mb-4">Navegação</h3>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
@@ -38,16 +38,16 @@ export function Footer() {
                   to="/sobre"
                   className="hover:text-teal-400 transition-colors flex items-center gap-1.5"
                 >
-                  <Info className="w-3.5 h-3.5" /> Sobre a Laura
+                  <Info className="w-3.5 h-3.5 shrink-0" /> <span>Sobre a Laura</span>
                 </Link>
               </li>
               <li>
-                <a href="/#pacotes" className="hover:text-teal-400 transition-colors">
+                <a href="/#pacotes" className="hover:text-teal-400 transition-colors block">
                   Pacotes & Roteiros
                 </a>
               </li>
               <li>
-                <a href="/#como-funciona" className="hover:text-teal-400 transition-colors">
+                <a href="/#como-funciona" className="hover:text-teal-400 transition-colors block">
                   Como Funciona
                 </a>
               </li>
@@ -56,11 +56,12 @@ export function Footer() {
                   to="/faq"
                   className="hover:text-teal-400 transition-colors flex items-center gap-1.5"
                 >
-                  <HelpCircle className="w-3.5 h-3.5" /> Dúvidas Frequentes (FAQ)
+                  <HelpCircle className="w-3.5 h-3.5 shrink-0" />{' '}
+                  <span>Dúvidas Frequentes (FAQ)</span>
                 </Link>
               </li>
               <li>
-                <Link to="/meus-grupos" className="hover:text-teal-400 transition-colors">
+                <Link to="/meus-grupos" className="hover:text-teal-400 transition-colors block">
                   Área do Cliente (Meus Grupos)
                 </Link>
               </li>
@@ -68,38 +69,43 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="min-w-0 overflow-hidden">
             <h3 className="text-base font-semibold text-slate-200 mb-4">Contato</h3>
             <ul className="space-y-3 text-sm text-slate-400">
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-teal-400 shrink-0" />
-                <span>contato@lauraturismo.com.br</span>
+              <li className="flex items-start gap-2 min-w-0">
+                <Mail className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
+                <a
+                  href="mailto:contato@lauraturismo.com.br"
+                  className="hover:text-teal-400 transition-colors break-all"
+                >
+                  contato@lauraturismo.com.br
+                </a>
               </li>
-              <li className="flex items-center gap-2">
+              <li className="flex items-center gap-2 min-w-0">
                 <Phone className="h-4 w-4 text-teal-400 shrink-0" />
                 <a
                   href="https://wa.me/5511998170951?text=Ol%C3%A1%20Laura!"
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-teal-400 transition-colors font-medium"
+                  className="hover:text-teal-400 transition-colors font-medium whitespace-nowrap"
                 >
                   +55 11 99817-0951
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-teal-400 shrink-0" />
-                <span>Santiago (Chile) & São Paulo (Brasil)</span>
+              <li className="flex items-start gap-2 min-w-0">
+                <MapPin className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
+                <span className="leading-snug">Santiago (Chile) & São Paulo (Brasil)</span>
               </li>
             </ul>
           </div>
 
           {/* Social Links with Tooltips */}
-          <div>
+          <div className="min-w-0 overflow-hidden">
             <h3 className="text-base font-semibold text-slate-200 mb-2">Redes Sociais</h3>
-            <p className="text-sm text-slate-400 mb-4">
+            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
               Siga nossos canais oficiais para dicas exclusivas e fotos das viagens:
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -108,13 +114,13 @@ export function Footer() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label="Instagram Oficial Laura Turismo"
-                      className="p-2.5 rounded-full bg-slate-800 hover:bg-gradient-to-tr hover:from-amber-600 hover:to-pink-600 text-slate-300 hover:text-white transition-all shadow"
+                      className="p-2.5 rounded-full bg-slate-800 hover:bg-gradient-to-tr hover:from-amber-600 hover:to-pink-600 text-slate-300 hover:text-white transition-all shadow shrink-0"
                     >
                       <Instagram className="h-5 w-5" />
                     </a>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Instagram: @lauraturismo (Página oficial)</p>
+                    <p>Instagram: @lauraturismo</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -125,13 +131,13 @@ export function Footer() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label="Facebook Oficial Laura Turismo"
-                      className="p-2.5 rounded-full bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-all shadow"
+                      className="p-2.5 rounded-full bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-all shadow shrink-0"
                     >
                       <Facebook className="h-5 w-5" />
                     </a>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Facebook: @lauraturismo (Página oficial)</p>
+                    <p>Facebook: @lauraturismo</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -142,7 +148,7 @@ export function Footer() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label="Site Oficial"
-                      className="p-2.5 rounded-full bg-slate-800 hover:bg-teal-700 text-slate-300 hover:text-white transition-all shadow"
+                      className="p-2.5 rounded-full bg-slate-800 hover:bg-teal-700 text-slate-300 hover:text-white transition-all shadow shrink-0"
                     >
                       <Globe className="h-5 w-5" />
                     </a>
@@ -154,7 +160,7 @@ export function Footer() {
               </TooltipProvider>
             </div>
             <p className="text-xs text-slate-500 mt-3 italic">
-              * Redes sociais em processo de atualização para a temporada 2026/2027.
+              * Redes sociais oficiais e suporte direto pelo WhatsApp da Laura.
             </p>
           </div>
         </div>

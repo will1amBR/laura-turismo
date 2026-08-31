@@ -90,51 +90,52 @@ export function GroupTimeline({ status, hasSchedule = false }: GroupTimelineProp
           <span className="font-extrabold">{steps[currentIdx].label}</span>
         </div>
       </div>
-
       {/* Progress Line */}
-      <div className="relative my-6">
+      <div className="relative my-4 sm:my-6 overflow-hidden sm:overflow-visible">
         {/* Background Track */}
-        <div className="absolute top-1/2 left-0 right-0 h-1.5 -translate-y-1/2 bg-white/20 rounded-full z-0" />
+        <div className="absolute top-5 md:top-6 left-4 right-4 h-1.5 -translate-y-1/2 bg-white/20 rounded-full z-0" />
 
         {/* Active Track with Smooth Transition */}
         <div
-          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 bg-gradient-to-r from-amber-400 via-emerald-400 to-sky-400 rounded-full z-0 transition-all duration-700 ease-out"
-          style={{ width: `${progressPercent}%` }}
+          className="absolute top-5 md:top-6 left-4 h-1.5 -translate-y-1/2 bg-gradient-to-r from-amber-400 via-emerald-400 to-sky-400 rounded-full z-0 transition-all duration-700 ease-out"
+          style={{ width: `calc(${progressPercent}% * 0.9 + 8px)` }}
         />
 
         {/* Steps Nodes */}
-        <div className="relative z-10 flex justify-between items-center">
+        <div className="relative z-10 flex justify-between items-start gap-1">
           {steps.map((step, idx) => {
             const isDone = idx < currentIdx
             const isCurrent = idx === currentIdx
-            const isPending = idx > currentIdx
             const Icon = step.icon
 
             return (
-              <div key={step.id} className="flex flex-col items-center group relative">
+              <div
+                key={step.id}
+                className="flex flex-col items-center group relative min-w-0 flex-1"
+              >
                 {/* Node Circle */}
                 <div
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg shrink-0 ${
                     isDone
-                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white ring-4 ring-emerald-400/30 scale-100'
+                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white ring-2 sm:ring-4 ring-emerald-400/30 scale-100'
                       : isCurrent
-                        ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 ring-4 ring-amber-300/60 scale-110 animate-bounce-subtle'
+                        ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 ring-2 sm:ring-4 ring-amber-300/60 scale-105 sm:scale-110'
                         : 'bg-slate-800/80 text-slate-400 border-2 border-white/20'
                   }`}
                 >
                   {isDone ? (
-                    <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                   ) : isCurrent ? (
-                    <Icon className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 stroke-[2.5]" />
                   ) : (
-                    <Circle className="w-4 h-4 md:w-5 md:h-5 opacity-40" />
+                    <Circle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 opacity-40" />
                   )}
                 </div>
 
                 {/* Step Label below */}
-                <div className="mt-2.5 text-center max-w-[70px] md:max-w-[100px]">
+                <div className="mt-2 text-center w-full min-w-0 px-0.5">
                   <p
-                    className={`text-[10px] md:text-xs font-bold leading-tight transition-colors ${
+                    className={`text-[9px] sm:text-[10px] md:text-xs font-bold leading-tight truncate transition-colors ${
                       isDone
                         ? 'text-emerald-300'
                         : isCurrent
@@ -142,10 +143,10 @@ export function GroupTimeline({ status, hasSchedule = false }: GroupTimelineProp
                           : 'text-slate-400'
                     }`}
                   >
-                    <span className="md:hidden">{step.emoji}</span>{' '}
-                    <span className="hidden md:inline">{step.label}</span>
+                    <span className="sm:hidden">{step.emoji}</span>{' '}
+                    <span className="hidden sm:inline">{step.label}</span>
                   </p>
-                  <p className="hidden md:block text-[9px] text-teal-200/70 mt-0.5 leading-tight">
+                  <p className="hidden md:block text-[9px] text-teal-200/70 mt-0.5 leading-tight truncate">
                     {step.description}
                   </p>
                 </div>
@@ -153,7 +154,7 @@ export function GroupTimeline({ status, hasSchedule = false }: GroupTimelineProp
             )
           })}
         </div>
-      </div>
+      </div>{' '}
     </div>
   )
 }

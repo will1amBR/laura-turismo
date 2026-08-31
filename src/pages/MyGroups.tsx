@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Compass, Calendar, ChevronRight, CheckCircle2, Clock } from 'lucide-react'
+import {
+  Compass,
+  Calendar,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  HelpCircle,
+} from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { getUserMemberships, GroupMemberRecord } from '@/services/members'
 import { formatDate } from '@/lib/utils'
@@ -8,12 +16,14 @@ import { GroupCountdownBadge } from '@/components/GroupCountdownBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { BookingOnboardingModal } from '@/components/BookingOnboardingModal'
 
 export default function MyGroups() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [memberships, setMemberships] = useState<GroupMemberRecord[]>([])
   const [loading, setLoading] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -40,15 +50,23 @@ export default function MyGroups() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
-          <Compass className="w-8 h-8 text-teal-700" /> Meus Grupos de Viagem
-        </h1>
-        <p className="text-slate-600 mt-1">
-          Acompanhe suas inscrições, status de aprovação e roteiros das viagens.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+            <Compass className="w-8 h-8 text-teal-700" /> Meus Grupos de Viagem
+          </h1>
+          <p className="text-sm text-slate-600 mt-1">
+            Acompanhe o status, dias do roteiro, galeria e checklist dos grupos que você faz parte.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setShowOnboarding(true)}
+          className="border-amber-300 bg-amber-50/70 hover:bg-amber-100 text-amber-900 font-bold gap-1.5 shadow-sm text-xs md:text-sm shrink-0 self-start sm:self-auto"
+        >
+          <HelpCircle className="w-4 h-4 text-amber-600" /> Como Funciona o Sistema?
+        </Button>
       </div>
-
       {loading ? (
         <div className="space-y-4">
           {[1, 2].map((i) => (
@@ -130,6 +148,9 @@ export default function MyGroups() {
           })}
         </div>
       )}
+
+      {/* Onboarding Dialog */}
+      <BookingOnboardingModal open={showOnboarding} onOpenChange={setShowOnboarding} />
     </div>
   )
 }

@@ -23,5 +23,35 @@ export const getPackageImageUrl = (record: PackageRecord) => {
   if (record.cover_image) {
     return pb.files.getURL(record, record.cover_image)
   }
-  return `https://img.usecurling.com/p/800/600?q=chile%20landscape&color=blue`
+  const title = (record.title || '').toLowerCase()
+  if (
+    title.includes('neve') ||
+    title.includes('esqui') ||
+    title.includes('valle nevado') ||
+    title.includes('portillo')
+  ) {
+    return 'https://img.usecurling.com/p/1200/800?q=valle%20nevado%20ski'
+  }
+  if (
+    title.includes('vinhedos') ||
+    title.includes('vinho') ||
+    title.includes('vinícola') ||
+    title.includes('concha y toro') ||
+    title.includes('maipo') ||
+    title.includes('casablanca')
+  ) {
+    return 'https://img.usecurling.com/p/1200/800?q=chile%20vineyard%20wine'
+  }
+  if (
+    title.includes('patagonia') ||
+    title.includes('patagônia') ||
+    title.includes('torres del paine')
+  ) {
+    return 'https://img.usecurling.com/p/1200/800?q=torres%20del%20paine'
+  }
+  if (title.includes('atacama') || title.includes('aventura')) {
+    return 'https://img.usecurling.com/p/1200/800?q=atacama%20desert%20chile'
+  }
+  // Default Santiago / Chile Andes
+  return 'https://img.usecurling.com/p/1200/800?q=santiago%20chile%20andes'
 }
